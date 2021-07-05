@@ -23,6 +23,7 @@ from github.codeowners import CodeownersEnumerator, CodeOwnerEntryResolver
 
 from concourse.factory import DefinitionFactory, RawPipelineDefinitionDescriptor
 from concourse.enumerator import (
+    PIPELINE_PARSE_ERROR_PIPELINE_NAME,
     DefinitionDescriptor,
     DefinitionDescriptorPreprocessor,
     TemplateRetriever,
@@ -366,7 +367,14 @@ class ReplicationResultProcessor:
 
                 pipelines_to_remove = set(concourse_api.pipelines()) - deployed_pipeline_names
 
-                if self.remove_pipelines_filter:
+                if PIPELINE_PARSE_ERROR_PIPELINE_NAME in deployed_pipeline_names:
+                    logger.warning(
+                        'Some pipelines could not be rendered (see above). '
+                        'Will not clean-up pipelines.'
+                    )
+                    pipelines_to_remove = set()
+
+                if pipelines_to_remove and self.remove_pipelines_filter:
                     logger.info(f'before applying filter: {pipelines_to_remove=}')
                     pipelines_to_remove = {
                         name for name in pipelines_to_remove

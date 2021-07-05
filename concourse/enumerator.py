@@ -45,6 +45,9 @@ ci.log.configure_default_logging()
 logger = logging.getLogger(__name__)
 
 
+PIPELINE_PARSE_ERROR_PIPELINE_NAME = '<invalid YAML>'
+
+
 class JobMappingNotFoundError(ValueError):
     ''' Signals that no JobMapping was found for a GitHub repository when processing.
     '''
@@ -133,7 +136,7 @@ class SimpleFileDefinitionEnumerator(DefinitionEnumerator):
             )
         except BaseException as e:
             yield DefinitionDescriptor(
-                pipeline_name='<invalid YAML>',
+                pipeline_name=PIPELINE_PARSE_ERROR_PIPELINE_NAME,
                 pipeline_definition={},
                 main_repo={
                     'path': self.repo_path,
@@ -268,7 +271,7 @@ class GithubDefinitionEnumeratorBase(DefinitionEnumerator):
             ]
         except yaml.scanner.ScannerError as e:
             yield DefinitionDescriptor(
-                pipeline_name='<invalid YAML>',
+                pipeline_name=PIPELINE_PARSE_ERROR_PIPELINE_NAME,
                 pipeline_definition=None,
                 main_repo={'path': repo_path, 'branch': 'refs/meta/ci', 'hostname': repo_hostname},
                 concourse_target_cfg=self.cfg_set.concourse(),
@@ -297,7 +300,7 @@ class GithubDefinitionEnumeratorBase(DefinitionEnumerator):
 
             except BaseException as e:
                 yield DefinitionDescriptor(
-                    pipeline_name='<invalid YAML>',
+                    pipeline_name=PIPELINE_PARSE_ERROR_PIPELINE_NAME,
                     pipeline_definition={},
                     main_repo={'path': repo_path, 'branch': branch_name, 'hostname': repo_hostname},
                     concourse_target_cfg=self.cfg_set.concourse(),
